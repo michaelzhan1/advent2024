@@ -63,59 +63,16 @@ def check_cycle(grid, start_i, start_j):
         visited.add((i, j, di))
 
         if new_i < 0 or new_i >= n or new_j < 0 or new_j >= m:
-            return False
+            break
         
         if grid[new_i][new_j] == '#':
             di = (di + 1) % 4
         else:
             i = new_i
             j = new_j
+    return False
 
 
-
-
-
-
-# def check_cycle(row_objs, col_objs, start_i, start_j):
-#     visited = set()
-#     di = 0
-#     i, j = start_i, start_j
-
-#     while True:
-#         match di:
-#             case 0: # check same col, to smaller index
-#                 idx = bisect_left(col_objs[j], i)
-#                 if idx == 0:
-#                     break
-#                 new_i = col_objs[j][idx - 1] + 1
-#                 new_j = j
-#             case 1: # check same row, to larger index
-#                 idx = bisect_left(row_objs[i], j)
-#                 if idx == len(row_objs[i]):
-#                     break
-#                 new_i = i
-#                 new_j = row_objs[i][idx] - 1
-#             case 2: # check same col, to larger index
-#                 idx = bisect_left(col_objs[j], i)
-#                 if idx == len(col_objs[j]):
-#                     break
-#                 new_i = col_objs[j][idx] - 1
-#                 new_j = j
-#             case 3: # check same row, to smaller index
-#                 idx = bisect_left(row_objs[i], j)
-#                 if idx == 0:
-#                     break
-#                 new_i = i
-#                 new_j = row_objs[i][idx - 1] + 1
-#             case _:
-#                 pass
-
-#         i, j = new_i, new_j
-#         if (i, j, di) in visited:
-#             return True
-#         visited.add((i, j, di))
-#         di = (di + 1) % 4
-#     return False
 
 # TODO: at each step in the path, check if we can make a cycle
 def count_possible_cycles(grid):
@@ -142,51 +99,14 @@ def count_possible_cycles(grid):
         if grid[new_i][new_j] == '#':
             di = (di + 1) % 4
         else:
-            
+            if start_i != new_i or start_j != new_j:
+                grid[new_i][new_j] = '#'
+                if check_cycle(grid, start_i, start_j):
+                    cycle_positions.add((new_i, new_j))
+                grid[new_i][new_j] = '.'
+            i, j = new_i, new_j
+    return len(cycle_positions)
 
-
-
-    # row_objs = defaultdict(list)
-    # col_objs = defaultdict(list)
-    # start_i, start_j = -1, -1
-    # for i in range(n):
-    #     for j in range(m):
-    #         if grid[i][j] == "#":
-    #             row_objs[i].append(j)
-    #             col_objs[j].append(i)
-    #         if grid[i][j] == "^":
-    #             start_i, start_j = i, j
-    
-    # # print(check_cycle(row_objs, col_objs, start_i, start_j))
-    # di = 0
-    # directions = [-1, 0, 1, 0, -1]
-    # i, j = start_i, start_j
-    # cycle_positions = set()
-    # while True:
-    #     new_i, new_j = i + directions[di], j + directions[di + 1]
-
-    #     if new_i < 0 or new_i >= n or new_j < 0 or new_j >= m:
-    #         break
-
-    #     if grid[new_i][new_j] == '#':
-    #         di = (di + 1) % 4
-    #     else:
-    #         # try to put an object at (new_i, new_j) and see what happens
-    #         if di == 0 or di == 2:
-    #             col_objs[new_j].append(new_i)
-    #             col_objs[new_j].sort()
-    #             if check_cycle(row_objs, col_objs, start_i, start_j) and (start_i != new_i or start_j != new_j):
-    #                 cycle_positions.add((new_i, new_j))
-    #             col_objs[new_j].remove(new_i)
-    #         else:
-    #             row_objs[new_i].append(new_j)
-    #             row_objs[new_i].sort()
-    #             if check_cycle(row_objs, col_objs, start_i, start_j) and (start_i != new_i or start_j != new_j):
-    #                 cycle_positions.add((new_i, new_j))
-    #             row_objs[new_i].remove(new_j)
-            
-    #         i, j = new_i, new_j
-    # return len(cycle_positions)
 
 
 
@@ -195,9 +115,8 @@ def main():
     # res = count_tiles(grid)
     # print(f"Part 1: {res}")
 
-    # res = count_possible_cycles(grid)
-    # print(f"Part 2: {res}")
-    print(check_cycle(grid, 6, 4))
+    res = count_possible_cycles(grid)
+    print(f"Part 2: {res}")
 
 if __name__ == "__main__":
     main()
