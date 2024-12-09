@@ -66,14 +66,18 @@ def compact_blocks(line):
         i -= 1
 
     # recreate the memory
-    arr = ''
+    arr = []
     for cell in memory:
         if len(cell) == 2:
-            arr += cell[0] * cell[1]
+            for _ in range(cell[1]):
+                arr.append(cell[0])
         elif cell[0]:
-            arr += cell[2] * cell[1]
-        elif not cell[0]:
-            arr += '0' * cell[1]
+            for _ in range(cell[1]):
+                arr.append(cell[2])
+        else:
+            for _ in range(cell[1]):
+                arr.append('0')
+    
     return arr
 
 def get_checksum_blocks(line):
