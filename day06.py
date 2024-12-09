@@ -1,6 +1,3 @@
-from bisect import bisect_left
-from collections import defaultdict
-
 def parse():
     with open('day06.in') as f:
         lines = f.read().splitlines()
@@ -72,9 +69,6 @@ def check_cycle(grid, start_i, start_j):
             j = new_j
     return False
 
-
-
-# TODO: at each step in the path, check if we can make a cycle
 def count_possible_cycles(grid):
     n = len(grid)
     m = len(grid[0])
@@ -107,13 +101,10 @@ def count_possible_cycles(grid):
             i, j = new_i, new_j
     return len(cycle_positions)
 
-
-
-
 def main():
     grid = parse()
-    # res = count_tiles(grid)
-    # print(f"Part 1: {res}")
+    res = count_tiles(grid)
+    print(f"Part 1: {res}")
 
     res = count_possible_cycles(grid)
     print(f"Part 2: {res}")
