@@ -2,7 +2,6 @@ def parse():
     with open('day09.in') as f:
         return f.read().strip()
 
-# TODO: look at 2 digit values?
 def compact(line):
     # even = ID, odd = blank
     res = [""] * sum(int(x) for x in line)
@@ -46,7 +45,6 @@ def compact_blocks(line):
         else:
             memory.append((False, int(line[i]), None))
     
-    # TODO: also let remaining gap be a thing
     i = len(memory) - 1
     while i >= 0:
         if len(memory[i]) == 2: # file
