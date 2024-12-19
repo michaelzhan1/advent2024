@@ -1,3 +1,5 @@
+from functools import cache
+
 def parse():
     with open('day17.in') as f:
         a = int(f.readline().strip().split()[-1])
@@ -48,11 +50,11 @@ def evaluate(a, b, c, ops):
         operator, operand = ops[i], ops[i + 1]
         match operator:
             case 0:
-                a //= 2 ** get_combo(operand, a, b, c)
+                a >>= get_combo(operand, a, b, c)
             case 1:
                 b ^= operand
             case 2:
-                b = get_combo(operand, a, b, c) % 8
+                b = get_combo(operand, a, b, c) & 7
             case 3:
                 if a != 0:
                     i = operand
@@ -60,20 +62,40 @@ def evaluate(a, b, c, ops):
             case 4:
                 b ^= c
             case 5:
-                res.append(get_combo(operand, a, b, c) % 8)
+                res.append(get_combo(operand, a, b, c) & 7)
             case 6:
-                b = a // 2 ** get_combo(operand, a, b, c)
+                b = a >> get_combo(operand, a, b, c)
             case 7:
-                c = a // 2 ** get_combo(operand, a, b, c)
+                c = a >> get_combo(operand, a, b, c)
         i += 2
 
-    return ','.join(list(map(str, res)))
-                            
+    return res
+
+def try_a_registers(a, b, c, ops):
+    def find(a, i):
+        output = evaluate(a, b, c, ops)
+        if output == ops:
+            return a
+        
+        elif output == ops[-i:] or not i:
+            # build most significant bits first
+            for n in range(8):
+                temp = find(8 * a + n, i + 1)
+                if temp is not None:
+                    return temp
+        
+        return None
+
+    return find(0, 0)
+
 
 def main():
     a, b, c, ops = parse()
     res = evaluate(a, b, c, ops)
-    print(f"Part 1: {res}")
+    print(f"Part 1: {','.join(map(str, res))}")
+
+    res = try_a_registers(a, b, c, ops)
+    print(f"Part 2: {res}")
 
 
 if __name__ == "__main__":
