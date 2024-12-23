@@ -26,11 +26,35 @@ def count_t_groups(graph):
                             res += 1
     return res
 
+def bors_kerbosch(R, P, X, graph, res):
+    if len(P) == 0 and len(X) == 0:
+        if len(R) > 2:
+            res.append(sorted(R))
+        return
+    
+    d, pivot = max([(len(graph[v]), v) for v in P.union(X)])
+
+    for v in P.difference(graph[pivot]):
+        bors_kerbosch(R.union(set([v])), P.intersection(graph[v]), X.intersection(graph[v]), graph, res)
+        P.remove(v)
+        X.add(v)
+
+
+def find_largest_clique(graph):
+    res = []
+    bors_kerbosch(set(), set(graph.keys()), set(), graph, res)
+
+    largest = sorted(res, key=len, reverse=True)[0]
+    return ','.join(largest)
+
     
 def main():
     graph = parse()
     res = count_t_groups(graph)
     print(f'Part 1: {res}')
+
+    res = find_largest_clique(graph)
+    print(f'Part 2: {res}')
 
 
 if __name__ == "__main__":
