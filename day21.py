@@ -5,84 +5,48 @@ def parse():
 def get_key_presses(sequence, keypad_type):
     if keypad_type == 1:
         keypad = ['789', '456', '123', '.0A']
-        positions = {keypad[i][j]: (i, j) for i in range(len(keypad)) for j in range(len(keypad[i]))}
-        i, j = positions['A']
-        all_res = []
-        for char in sequence:
-            new_moves = set()
-            new_i, new_j = positions[char]
-
-            i_char = 'v' if new_i > i else '^' if new_i < i else ''
-            j_char = '>' if new_j > j else '<' if new_j < j else ''
-            di = abs(new_i - i)
-            dj = abs(new_j - j)
-
-            # add horizontal first: can't move from 0A line to first column
-            if not (i == 3 and new_j == 0):
-                new_moves.add(j_char * dj + i_char * di + 'A')
-            
-            # add vertical first: can't move from left column to 0A line in this manner
-            if not (new_i == 3 and j == 0):
-                new_moves.add(i_char * di + j_char * dj + 'A')
-            
-            i, j = new_i, new_j
-
-            if len(all_res) == 0:
-                all_res = list(new_moves)
-            else:
-                all_res = [res + new_move for res in all_res for new_move in new_moves]
-        return all_res
-    elif keypad_type == 2:
+        n = len(keypad)
+        m = len(keypad[0])
+    else:
         keypad = ['.^A', '<v>']
-        positions = {keypad[i][j]: (i, j) for i in range(len(keypad)) for j in range(len(keypad[i]))}
-        i, j = positions['A']
-        all_res = []
-        for char in sequence:
-            new_moves = set()
-            new_i, new_j = positions[char]
+        n = len(keypad)
+        m = len(keypad[0])
 
-            i_char = 'v' if new_i > i else '^' if new_i < i else ''
-            j_char = '>' if new_j > j else '<' if new_j < j else ''
-            di = abs(new_i - i)
-            dj = abs(new_j - j)
+    positions = {keypad[i][j]: (i, j) for i in range(n) for j in range(m)}
+    i, j = positions['A']
+    gap_i, gap_j = positions['.']
 
-            # horizontal first: can't move from ^A line to first column in this manner
-            if not (i == 0 and new_j == 0):
-                new_moves.add(j_char * dj + i_char * di + 'A')
+    move = ''
+    for char in sequence:
+        new_i, new_j = positions[char]
+        i_char = 'v' if new_i > i else '^' if new_i < i else ''
+        j_char = '>' if new_j > j else '<' if new_j < j else ''
 
-            # vertical first: can't move from left column to ^A line in this manner
-            if not (new_i == 0 and j == 0):
-                new_moves.add(i_char * di + j_char * dj + 'A')
-            
-            i, j = new_i, new_j
+        di = abs(new_i - i)
+        dj = abs(new_j - j)
 
-            if len(all_res) == 0:
-                all_res = list(new_moves)
+        if (i == gap_i and new_j == gap_j) or (new_i == gap_i and j == gap_j):
+            # horizontal first
+            if i == gap_i and new_j == gap_j:
+                move += i_char * di + j_char * dj + 'A'
             else:
-                all_res = [res + new_move for res in all_res for new_move in new_moves]
-        return all_res
-                
+                move += j_char * dj + i_char * di + 'A'
+        else:
+            # up right or down right: press vertical first
+            if (new_i < i and new_j > j) or (new_i > i and new_j > j):
+                move += di * i_char + dj * j_char + 'A'
+            else:
+                move += dj * j_char + di * i_char + 'A'
+
+        i, j = new_i, new_j
+
+    return move
 
 def get_complexity(original_code):
-    # first abstraction
-    codes_1 = get_key_presses(original_code, 1)
-    
-    # second abstraction
-    codes_2 = []
-    for code in codes_1:
-        codes_2 += get_key_presses(code, 2)
-        min_length = min(map(len, codes_2))
-        codes_2 = [code for code in codes_2 if len(code) == min_length]
-    
-    # last abstraction
-    codes_3 = []
-    for code in codes_2:
-        codes_3 += get_key_presses(code, 2)
-        min_length = min(map(len, codes_3))
-        codes_3 = [code for code in codes_3 if len(code) == min_length]
-    
-    return len(codes_3[0]) * int(original_code[:-1])
-
+    code1 = get_key_presses(original_code, 1)
+    code2 = get_key_presses(code1, 2)
+    code3 = get_key_presses(code2, 2)
+    return len(code3) * int(original_code[:-1])
     
 def get_complexities(codes):
     res = 0
@@ -90,9 +54,26 @@ def get_complexities(codes):
         res += get_complexity(code)
     return res
 
+def get_complexity_25(original_code):
+    code = get_key_presses(original_code, 1)
+    for _ in range(25):
+        code = get_key_presses(code, 2)
+    return len(code) * int(original_code[:-1])
+
+def get_complexities_25(codes):
+    res = 0
+    for code in codes:
+        print(code)
+        res += get_complexity_25(code)
+    return res
+
 def main():
     codes = parse()
-    print(get_complexities(codes))
+    res = get_complexities(codes)
+    print(f"Part 1: {res}")
+
+    res = get_complexities_25(codes)
+    print(f"Part 2: {res}")
 
 
 
